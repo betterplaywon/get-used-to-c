@@ -55,7 +55,7 @@ export async function runOnJudge0({ source, language, stdin = '' }: RunArgs): Pr
     );
   }
 
-  const endpoint = `${baseUrl}/submissions?base64_encoded=false&wait=true`;
+  const endpoint = `${baseUrl}/submissions?base64_encoded=true&wait=true`;
 
   let response: Response;
   try {
@@ -67,9 +67,9 @@ export async function runOnJudge0({ source, language, stdin = '' }: RunArgs): Pr
         'X-RapidAPI-Host': apiHost,
       },
       body: JSON.stringify({
-        source_code: source,
+        source_code: encodeBase64Utf8(source),
         language_id: LANGUAGE_IDS[language],
-        stdin,
+        stdin: encodeBase64Utf8(stdin),
       }),
     });
   } catch {
@@ -89,11 +89,30 @@ export async function runOnJudge0({ source, language, stdin = '' }: RunArgs): Pr
   const data = (await response.json()) as Judge0SubmissionResponse;
 
   return {
-    stdout: data.stdout,
-    stderr: data.stderr,
-    compileOutput: data.compile_output,
+    stdout: decodeBase64Utf8(data.stdout),
+    stderr: decodeBase64Utf8(data.stderr),
+    compileOutput: decodeBase64Utf8(data.compile_output),
     status: data.status,
     time: data.time,
     memory: data.memory,
   };
+}
+
+function encodeBase64Utf8(value: string): string {
+  const bytes = new TextEncoder().encode(value);
+  let binary = '';
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+  return btoa(binary);
+}
+
+function decodeBase64Utf8(value: string | null): string | null {
+  if (value == null) return null;
+  const binary = atob(value);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return new TextDecoder().decode(bytes);
 }
