@@ -8,11 +8,19 @@ export function useRunCode(): { run: () => Promise<void> } {
   const fail = usePlaygroundStore((s) => s.fail);
 
   const run = async () => {
-    const { code, language } = usePlaygroundStore.getState();
+    const { code, language, stdin } = usePlaygroundStore.getState();
     startRun();
     try {
-      const result = await runOnJudge0({ source: code, language });
+      const result = await runOnJudge0({ source: code, language, stdin });
       const formatted = formatResult(result);
+      if (formatted.kind === 'compile_error') {
+        fail(formatted.text, result.compileOutput);
+        return;
+      }
+      if (formatted.kind === 'runtime_error') {
+        fail(formatted.text);
+        return;
+      }
       succeed(formatted.text);
     } catch (error) {
       if (error instanceof Judge0ConfigError || error instanceof Judge0NetworkError) {
