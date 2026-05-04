@@ -25,3 +25,8 @@ dist-ssr
 
 # Claude Code local settings
 .claude/
+CLAUDE.md
+docs/
+
+# env
+.env*
