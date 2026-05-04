@@ -1,24 +1,28 @@
-import { useState } from 'react';
 import {
   Box,
   Button,
+  CircularProgress,
   Stack,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
 } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import { CodeEditor, type EditorLanguage } from '../features/editor/CodeEditor';
-import { SAMPLE_C_HELLO } from '../features/editor/samples';
+import { CodeEditor } from '../features/editor/CodeEditor';
+import { useRunCode } from '../features/runner/useRunCode';
+import { usePlaygroundStore } from '../store/playgroundStore';
 
 export function PlaygroundPage() {
-  const [language, setLanguage] = useState<EditorLanguage>('c');
-  const [code, setCode] = useState(SAMPLE_C_HELLO);
-  const [output, setOutput] = useState<string>('');
+  const code = usePlaygroundStore((s) => s.code);
+  const language = usePlaygroundStore((s) => s.language);
+  const output = usePlaygroundStore((s) => s.output);
+  const status = usePlaygroundStore((s) => s.status);
+  const errorMessage = usePlaygroundStore((s) => s.errorMessage);
+  const setCode = usePlaygroundStore((s) => s.setCode);
+  const setLanguage = usePlaygroundStore((s) => s.setLanguage);
 
-  const handleRun = () => {
-    setOutput('(아직 코드 실행 엔진이 연결되지 않았습니다.)');
-  };
+  const { run } = useRunCode();
+  const isRunning = status === 'running';
 
   return (
     <Stack sx={{ gap: 2, height: 'calc(100vh - 160px)' }}>
@@ -29,12 +33,20 @@ export function PlaygroundPage() {
             value={language}
             exclusive
             size="small"
+            disabled={isRunning}
             onChange={(_, v) => v && setLanguage(v)}
           >
             <ToggleButton value="c">C</ToggleButton>
             <ToggleButton value="cpp">C++</ToggleButton>
           </ToggleButtonGroup>
-          <Button variant="contained" startIcon={<PlayArrowIcon />} onClick={handleRun}>
+          <Button
+            variant="contained"
+            disabled={isRunning}
+            startIcon={
+              isRunning ? <CircularProgress size={20} color="inherit" /> : <PlayArrowIcon />
+            }
+            onClick={run}
+          >
             실행
           </Button>
         </Stack>
@@ -55,13 +67,50 @@ export function PlaygroundPage() {
             overflow: 'auto',
           }}
         >
-          {output || (
-            <Typography color="text.secondary" sx={{ fontFamily: 'inherit', fontSize: 'inherit' }}>
-              실행 버튼을 눌러 결과를 확인하세요.
-            </Typography>
-          )}
+          <PlaygroundOutput
+            status={status}
+            output={output}
+            errorMessage={errorMessage}
+          />
         </Box>
       </Box>
     </Stack>
   );
+}
+
+type PlaygroundOutputProps = {
+  status: ReturnType<typeof usePlaygroundStore.getState>['status'];
+  output: string;
+  errorMessage: string | null;
+};
+
+function PlaygroundOutput({ status, output, errorMessage }: PlaygroundOutputProps) {
+  if (status === 'running') {
+    return (
+      <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+        <CircularProgress size={20} />
+        <Typography color="text.secondary" sx={{ fontFamily: 'inherit', fontSize: 'inherit' }}>
+          실행 중...
+        </Typography>
+      </Stack>
+    );
+  }
+
+  if (status === 'error') {
+    return (
+      <Box sx={{ color: 'error.main', fontFamily: 'inherit', fontSize: 'inherit' }}>
+        {errorMessage ?? '알 수 없는 오류가 발생했습니다.'}
+      </Box>
+    );
+  }
+
+  if (status === 'idle' && !output) {
+    return (
+      <Typography color="text.secondary" sx={{ fontFamily: 'inherit', fontSize: 'inherit' }}>
+        실행 버튼을 눌러 결과를 확인하세요.
+      </Typography>
+    );
+  }
+
+  return <>{output}</>;
 }
