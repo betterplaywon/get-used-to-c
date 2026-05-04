@@ -1,5 +1,8 @@
-import { Editor, type OnMount } from '@monaco-editor/react';
+import { useEffect, useRef } from 'react';
+import { Editor, type Monaco, type OnMount } from '@monaco-editor/react';
 import { Box, CircularProgress } from '@mui/material';
+import type { editor } from 'monaco-editor';
+import type { ParsedDiagnostic } from '../runner/errorMarkers';
 
 export type EditorLanguage = 'c' | 'cpp';
 
@@ -9,7 +12,10 @@ type CodeEditorProps = {
   language?: EditorLanguage;
   height?: number | string;
   readOnly?: boolean;
+  diagnostics?: ParsedDiagnostic[];
 };
+
+const MARKER_OWNER = 'get-used-to-c-runner';
 
 export function CodeEditor({
   value,
@@ -17,8 +23,15 @@ export function CodeEditor({
   language = 'c',
   height = '100%',
   readOnly = false,
+  diagnostics,
 }: CodeEditorProps) {
-  const handleMount: OnMount = (editor, monaco) => {
+  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+  const monacoRef = useRef<Monaco | null>(null);
+
+  const handleMount: OnMount = (editorInstance, monaco) => {
+    editorRef.current = editorInstance;
+    monacoRef.current = monaco;
+
     monaco.editor.defineTheme('get-used-to-c', {
       base: 'vs',
       inherit: true,
@@ -28,11 +41,36 @@ export function CodeEditor({
       },
     });
     monaco.editor.setTheme('get-used-to-c');
-    editor.updateOptions({
+    editorInstance.updateOptions({
       tabSize: 4,
       insertSpaces: true,
     });
   };
+
+  useEffect(() => {
+    const editorInstance = editorRef.current;
+    const monaco = monacoRef.current;
+    if (!editorInstance || !monaco) return;
+
+    const model = editorInstance.getModel();
+    if (!model) return;
+
+    const markers: editor.IMarkerData[] = (diagnostics ?? []).map((d) => ({
+      startLineNumber: d.line,
+      startColumn: d.column,
+      endLineNumber: d.line,
+      endColumn: d.column + 1,
+      message: d.message,
+      severity:
+        d.severity === 'error'
+          ? monaco.MarkerSeverity.Error
+          : d.severity === 'warning'
+            ? monaco.MarkerSeverity.Warning
+            : monaco.MarkerSeverity.Info,
+    }));
+
+    monaco.editor.setModelMarkers(model, MARKER_OWNER, markers);
+  }, [diagnostics]);
 
   return (
     <Box
