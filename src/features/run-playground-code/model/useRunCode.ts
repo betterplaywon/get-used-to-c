@@ -1,11 +1,6 @@
-import { usePlaygroundStore } from '../../store/playgroundStore';
-import {
-  Judge0ConfigError,
-  Judge0NetworkError,
-  runOnJudge0,
-  type Judge0Result,
-} from '../../lib/judge0';
-import { formatResult } from './formatResult';
+import { runOnJudge0, type Judge0Result } from '@/shared/api/judge0';
+import { formatResult, toErrorMessage } from '@/shared/lib/formatResult';
+import { usePlaygroundStore } from './store';
 
 export function useRunCode(): { run: () => Promise<void> } {
   const startRun = usePlaygroundStore((s) => s.startRun);
@@ -37,11 +32,4 @@ export function useRunCode(): { run: () => Promise<void> } {
   };
 
   return { run };
-}
-
-function toErrorMessage(error: unknown): string {
-  if (error instanceof Judge0ConfigError || error instanceof Judge0NetworkError) {
-    return error.message;
-  }
-  return '알 수 없는 오류가 발생했습니다. 다시 시도해 주세요.';
 }

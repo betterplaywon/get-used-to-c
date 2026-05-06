@@ -1,12 +1,7 @@
 import { useCallback, useState } from 'react';
-import {
-  Judge0ConfigError,
-  Judge0NetworkError,
-  runOnJudge0,
-  type Judge0Result,
-} from '../../lib/judge0';
-import type { EditorLanguage } from '../editor/CodeEditor';
-import { formatResult } from '../runner/formatResult';
+import { runOnJudge0, type Judge0Result } from '@/shared/api/judge0';
+import { formatResult, toErrorMessage } from '@/shared/lib/formatResult';
+import type { EditorLanguage } from '@/shared/types/code';
 
 export type TutorialRunStatus = 'idle' | 'running' | 'done' | 'error';
 
@@ -82,11 +77,4 @@ export function useTutorialRunner(): {
   const reset = useCallback(() => setState(INITIAL_STATE), []);
 
   return { state, run, reset };
-}
-
-function toErrorMessage(error: unknown): string {
-  if (error instanceof Judge0ConfigError || error instanceof Judge0NetworkError) {
-    return error.message;
-  }
-  return '알 수 없는 오류가 발생했습니다. 다시 시도해 주세요.';
 }

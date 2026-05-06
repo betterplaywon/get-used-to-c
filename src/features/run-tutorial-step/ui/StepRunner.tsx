@@ -1,16 +1,12 @@
 import { useMemo, useState } from 'react';
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Box, Button, CircularProgress, Stack, Typography } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import { CodeEditor, type EditorLanguage } from '../editor/CodeEditor';
-import { parseCompilerOutput } from '../runner/errorMarkers';
-import { useTutorialRunner } from './useTutorialRunner';
+import { CodeEditor } from '@/shared/ui/CodeEditor';
+import { ExecutionOutput } from '@/shared/ui/ExecutionOutput';
+import { parseCompilerOutput } from '@/shared/lib/errorMarkers';
+import type { EditorLanguage } from '@/shared/types/code';
+import { useTutorialRunner } from '../model/useTutorialRunner';
 
 type StepRunnerProps = {
   initialCode: string;
@@ -73,23 +69,12 @@ export function StepRunner({ initialCode, language, expectedStdout, hint }: Step
         />
       </Box>
 
-      <Box
-        sx={{
-          border: 1,
-          borderColor: 'divider',
-          borderRadius: 1,
-          p: 1.5,
-          backgroundColor: 'grey.50',
-          fontFamily: 'ui-monospace, "SF Mono", Menlo, Consolas, monospace',
-          fontSize: 14,
-          whiteSpace: 'pre-wrap',
-          minHeight: 96,
-          maxHeight: 220,
-          overflow: 'auto',
-        }}
-      >
-        <RunnerOutput state={state} />
-      </Box>
+      <ExecutionOutput
+        status={state.status}
+        output={state.output}
+        errorMessage={state.errorMessage}
+        dense
+      />
 
       {expectedStdout != null && state.status === 'done' && (
         <Typography
@@ -107,36 +92,4 @@ export function StepRunner({ initialCode, language, expectedStdout, hint }: Step
       )}
     </Stack>
   );
-}
-
-type RunnerOutputProps = {
-  state: ReturnType<typeof useTutorialRunner>['state'];
-};
-
-function RunnerOutput({ state }: RunnerOutputProps) {
-  if (state.status === 'running') {
-    return (
-      <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
-        <CircularProgress size={16} />
-        <Typography color="text.secondary" sx={{ fontFamily: 'inherit', fontSize: 'inherit' }}>
-          실행 중...
-        </Typography>
-      </Stack>
-    );
-  }
-  if (state.status === 'error') {
-    return (
-      <Box sx={{ color: 'error.main', fontFamily: 'inherit', fontSize: 'inherit' }}>
-        {state.errorMessage ?? '알 수 없는 오류가 발생했습니다.'}
-      </Box>
-    );
-  }
-  if (state.status === 'idle' && !state.output) {
-    return (
-      <Typography color="text.secondary" sx={{ fontFamily: 'inherit', fontSize: 'inherit' }}>
-        실행 버튼을 눌러 결과를 확인하세요.
-      </Typography>
-    );
-  }
-  return <>{state.output}</>;
 }

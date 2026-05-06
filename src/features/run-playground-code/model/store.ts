@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import type { EditorLanguage } from '../features/editor/CodeEditor';
-import { SAMPLE_C_HELLO } from '../features/editor/samples';
+import type { EditorLanguage } from '@/shared/types/code';
+import { SAMPLE_C_HELLO } from '@/shared/config/samples';
 
 export type PlaygroundStatus = 'idle' | 'running' | 'done' | 'error';
 
