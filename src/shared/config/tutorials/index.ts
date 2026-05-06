@@ -1,4 +1,4 @@
-import type { Tutorial } from '../types';
+import type { Tutorial } from './types';
 import { INTRO_TUTORIAL } from './intro';
 import { VARIABLES_TUTORIAL } from './variables';
 import { OPERATORS_TUTORIAL } from './operators';
@@ -7,6 +7,8 @@ import { FUNCTIONS_TUTORIAL } from './functions';
 import { POINTERS_TUTORIAL } from './pointers';
 import { ARRAYS_TUTORIAL } from './arrays';
 import { OUTRO_TUTORIAL } from './outro';
+
+export type { Tutorial, TutorialStep } from './types';
 
 export const TUTORIALS: readonly Tutorial[] = [
   INTRO_TUTORIAL,

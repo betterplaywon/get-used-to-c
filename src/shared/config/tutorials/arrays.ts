@@ -1,4 +1,4 @@
-import type { Tutorial } from '../types';
+import type { Tutorial } from './types';
 
 export const ARRAYS_TUTORIAL: Tutorial = {
   slug: 'arrays',

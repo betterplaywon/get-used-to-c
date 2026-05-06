@@ -1,4 +1,4 @@
-import type { Tutorial } from '../types';
+import type { Tutorial } from './types';
 
 export const INTRO_TUTORIAL: Tutorial = {
   slug: 'intro',

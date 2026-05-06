@@ -1,4 +1,4 @@
-import type { EditorLanguage } from '../editor/CodeEditor';
+import type { EditorLanguage } from '@/shared/types/code';
 
 export type TutorialStep = {
   title: string;

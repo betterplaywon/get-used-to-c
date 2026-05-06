@@ -2,9 +2,9 @@ import { useEffect, useRef } from 'react';
 import { Editor, type Monaco, type OnMount } from '@monaco-editor/react';
 import { Box, CircularProgress } from '@mui/material';
 import type { editor } from 'monaco-editor';
-import type { ParsedDiagnostic } from '../runner/errorMarkers';
-
-export type EditorLanguage = 'c' | 'cpp';
+import type { ParsedDiagnostic } from '@/shared/lib/errorMarkers';
+import type { EditorLanguage } from '@/shared/types/code';
+import { MONOSPACE_FONT_FAMILY } from '@/shared/config/theme';
 
 type CodeEditorProps = {
   value: string;
@@ -90,7 +90,7 @@ export function CodeEditor({
         loading={<CircularProgress size={24} />}
         options={{
           fontSize: 14,
-          fontFamily: 'ui-monospace, "SF Mono", Menlo, Consolas, monospace',
+          fontFamily: MONOSPACE_FONT_FAMILY,
           minimap: { enabled: false },
           scrollBeyondLastLine: false,
           automaticLayout: true,

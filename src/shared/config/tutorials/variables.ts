@@ -1,4 +1,4 @@
-import type { Tutorial } from '../types';
+import type { Tutorial } from './types';
 
 export const VARIABLES_TUTORIAL: Tutorial = {
   slug: 'variables',

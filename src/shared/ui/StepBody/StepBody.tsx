@@ -1,4 +1,5 @@
 import { Stack, Typography } from '@mui/material';
+import { MONOSPACE_FONT_FAMILY } from '@/shared/config/theme';
 
 type StepBodyProps = {
   paragraphs: string[];
@@ -25,7 +26,7 @@ function renderInline(text: string) {
           key={i}
           component="code"
           sx={{
-            fontFamily: 'ui-monospace, "SF Mono", Menlo, Consolas, monospace',
+            fontFamily: MONOSPACE_FONT_FAMILY,
             fontSize: '0.95em',
             backgroundColor: 'grey.50',
             border: 1,

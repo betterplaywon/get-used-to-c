@@ -1,4 +1,4 @@
-import type { Judge0Result } from '../../lib/judge0';
+import { Judge0ConfigError, Judge0NetworkError, type Judge0Result } from '@/shared/api/judge0';
 
 export type FormattedResultKind = 'stdout' | 'compile_error' | 'runtime_error' | 'empty';
 
@@ -26,4 +26,11 @@ export function formatResult(result: Judge0Result): FormattedResult {
   }
 
   return { text: stdout, kind: 'stdout' };
+}
+
+export function toErrorMessage(error: unknown): string {
+  if (error instanceof Judge0ConfigError || error instanceof Judge0NetworkError) {
+    return error.message;
+  }
+  return '알 수 없는 오류가 발생했습니다. 다시 시도해 주세요.';
 }

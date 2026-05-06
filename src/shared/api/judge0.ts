@@ -1,4 +1,4 @@
-export type Judge0Language = 'c' | 'cpp';
+import type { EditorLanguage } from '@/shared/types/code';
 
 export type Judge0Result = {
   stdout: string | null;
@@ -23,7 +23,7 @@ export class Judge0NetworkError extends Error {
   }
 }
 
-const LANGUAGE_IDS: Record<Judge0Language, number> = {
+const LANGUAGE_IDS: Record<EditorLanguage, number> = {
   c: 50,
   cpp: 54,
 };
@@ -40,7 +40,7 @@ type Judge0SubmissionResponse = {
 
 type RunArgs = {
   source: string;
-  language: Judge0Language;
+  language: EditorLanguage;
   stdin?: string;
 };
 

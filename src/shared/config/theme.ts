@@ -1,5 +1,7 @@
 import { createTheme } from '@mui/material/styles';
 
+export const MONOSPACE_FONT_FAMILY = 'ui-monospace, "SF Mono", Menlo, Consolas, monospace';
+
 export const theme = createTheme({
   palette: {
     mode: 'light',
