@@ -1,5 +1,6 @@
 import { AppBar, Box, Button, Container, Toolbar, Typography } from '@mui/material';
 import { Link as RouterLink, Outlet, useLocation } from 'react-router-dom';
+import { isNavActive } from '../lib/navigation';
 
 const navItems = [
   { label: '홈', path: '/' },
@@ -28,7 +29,7 @@ export function Layout() {
                 key={item.path}
                 component={RouterLink}
                 to={item.path}
-                color={location.pathname === item.path ? 'primary' : 'inherit'}
+                color={isNavActive(location.pathname, item.path) ? 'primary' : 'inherit'}
               >
                 {item.label}
               </Button>
