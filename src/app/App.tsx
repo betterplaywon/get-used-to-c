@@ -1,6 +1,6 @@
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { RouterProvider } from 'react-router-dom';
-import { theme } from './theme/theme';
+import { theme } from '@/shared/config/theme';
 import { router } from './router';
 
 function App() {
