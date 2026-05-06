@@ -10,10 +10,11 @@ import {
   Typography,
 } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import { CodeEditor } from '../features/editor/CodeEditor';
-import { useRunCode } from '../features/runner/useRunCode';
-import { parseCompilerOutput } from '../features/runner/errorMarkers';
-import { usePlaygroundStore } from '../store/playgroundStore';
+import { CodeEditor } from '@/shared/ui/CodeEditor';
+import { ExecutionOutput } from '@/shared/ui/ExecutionOutput';
+import { parseCompilerOutput } from '@/shared/lib/errorMarkers';
+import { MONOSPACE_FONT_FAMILY } from '@/shared/config/theme';
+import { useRunCode, usePlaygroundStore } from '@/features/run-playground-code';
 
 export function PlaygroundPage() {
   const code = usePlaygroundStore((s) => s.code);
@@ -83,73 +84,20 @@ export function PlaygroundPage() {
               slotProps={{
                 input: {
                   sx: {
-                    fontFamily: 'ui-monospace, "SF Mono", Menlo, Consolas, monospace',
+                    fontFamily: MONOSPACE_FONT_FAMILY,
                     fontSize: 14,
                   },
                 },
               }}
             />
           </Stack>
-          <Box
-            sx={{
-              border: 1,
-              borderColor: 'divider',
-              borderRadius: 1,
-              p: 2,
-              backgroundColor: 'grey.50',
-              fontFamily: 'ui-monospace, "SF Mono", Menlo, Consolas, monospace',
-              fontSize: 14,
-              whiteSpace: 'pre-wrap',
-              overflow: 'auto',
-              flex: 1,
-              minHeight: 0,
-            }}
-          >
-            <PlaygroundOutput
-              status={status}
-              output={output}
-              errorMessage={errorMessage}
-            />
-          </Box>
+          <ExecutionOutput
+            status={status}
+            output={output}
+            errorMessage={errorMessage}
+          />
         </Stack>
       </Box>
     </Stack>
   );
-}
-
-type PlaygroundOutputProps = {
-  status: ReturnType<typeof usePlaygroundStore.getState>['status'];
-  output: string;
-  errorMessage: string | null;
-};
-
-function PlaygroundOutput({ status, output, errorMessage }: PlaygroundOutputProps) {
-  if (status === 'running') {
-    return (
-      <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
-        <CircularProgress size={20} />
-        <Typography color="text.secondary" sx={{ fontFamily: 'inherit', fontSize: 'inherit' }}>
-          실행 중...
-        </Typography>
-      </Stack>
-    );
-  }
-
-  if (status === 'error') {
-    return (
-      <Box sx={{ color: 'error.main', fontFamily: 'inherit', fontSize: 'inherit' }}>
-        {errorMessage ?? '알 수 없는 오류가 발생했습니다.'}
-      </Box>
-    );
-  }
-
-  if (status === 'idle' && !output) {
-    return (
-      <Typography color="text.secondary" sx={{ fontFamily: 'inherit', fontSize: 'inherit' }}>
-        실행 버튼을 눌러 결과를 확인하세요.
-      </Typography>
-    );
-  }
-
-  return <>{output}</>;
 }

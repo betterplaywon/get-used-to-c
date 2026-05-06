@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { Box, Button, Stack, Typography } from '@mui/material';
 import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import { TUTORIALS, findTutorial, findTutorialIndex } from '../features/tutorial/content';
-import { StepBody } from '../features/tutorial/StepBody';
-import { StepNav } from '../features/tutorial/StepNav';
-import { StepRunner } from '../features/tutorial/StepRunner';
-import type { Tutorial } from '../features/tutorial/types';
+import { findTutorial, findTutorialIndex, type Tutorial } from '@/shared/config/tutorials';
+import { StepBody } from '@/shared/ui/StepBody';
+import { StepNav } from '@/shared/ui/StepNav';
+import { StepRunner } from '@/features/run-tutorial-step';
+import { getStepNavInfo } from '../lib/getStepNavInfo';
 
 export function TutorialDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -39,46 +39,30 @@ function TutorialContent({ tutorial }: TutorialContentProps) {
 
   const step = tutorial.steps[stepIndex];
   const tutorialIndex = findTutorialIndex(tutorial.slug);
-  const isFirstStep = stepIndex === 0;
-  const isLastStep = stepIndex === tutorial.steps.length - 1;
-  const prevTutorial = tutorialIndex > 0 ? TUTORIALS[tutorialIndex - 1] : undefined;
-  const nextTutorial =
-    tutorialIndex < TUTORIALS.length - 1 ? TUTORIALS[tutorialIndex + 1] : undefined;
+  const navInfo = getStepNavInfo(tutorial.slug, stepIndex, tutorial.steps.length);
 
   const handlePrev = () => {
-    if (!isFirstStep) {
+    if (stepIndex > 0) {
       setStepIndex((i) => i - 1);
       return;
     }
-    if (prevTutorial) {
-      navigate(`/tutorials/${prevTutorial.slug}`);
+    if (navInfo.prevTutorialSlug) {
+      navigate(`/tutorials/${navInfo.prevTutorialSlug}`);
     }
   };
 
   const handleNext = () => {
-    if (!isLastStep) {
+    if (stepIndex < tutorial.steps.length - 1) {
       setStepIndex((i) => i + 1);
       return;
     }
-    if (nextTutorial) {
-      navigate(`/tutorials/${nextTutorial.slug}`);
+    if (navInfo.nextTutorialSlug) {
+      navigate(`/tutorials/${navInfo.nextTutorialSlug}`);
     } else {
       navigate('/tutorials');
     }
   };
 
-  const prevLabel = isFirstStep
-    ? prevTutorial
-      ? `이전 단원: ${prevTutorial.title}`
-      : '이전'
-    : '이전 단계';
-  const nextLabel = isLastStep
-    ? nextTutorial
-      ? `다음 단원: ${nextTutorial.title}`
-      : '목록으로'
-    : '다음 단계';
-
-  const prevDisabled = isFirstStep && !prevTutorial;
   const hasCode = step.code != null;
 
   return (
@@ -130,9 +114,9 @@ function TutorialContent({ tutorial }: TutorialContentProps) {
         total={tutorial.steps.length}
         onPrev={handlePrev}
         onNext={handleNext}
-        prevLabel={prevLabel}
-        nextLabel={nextLabel}
-        prevDisabled={prevDisabled}
+        prevLabel={navInfo.prevLabel}
+        nextLabel={navInfo.nextLabel}
+        prevDisabled={navInfo.prevDisabled}
       />
     </Stack>
   );

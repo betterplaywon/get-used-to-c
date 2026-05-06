@@ -1,5 +1,5 @@
 import { Stack, Typography } from '@mui/material';
-import { TutorialList } from '../features/tutorial/TutorialList';
+import { TutorialList } from '@/widgets/tutorial-list';
 
 export function TutorialsPage() {
   return (
