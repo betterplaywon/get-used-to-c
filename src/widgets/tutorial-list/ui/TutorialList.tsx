@@ -7,7 +7,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-import { TUTORIALS } from './content';
+import { TUTORIALS } from '@/shared/config/tutorials';
 
 export function TutorialList() {
   return (

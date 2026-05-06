@@ -1,6 +1,6 @@
 import { AppBar, Box, Button, Container, Toolbar, Typography } from '@mui/material';
 import { Link as RouterLink, Outlet, useLocation } from 'react-router-dom';
-import { isNavActive } from '../lib/navigation';
+import { isNavActive } from '@/shared/lib/navigation';
 
 const navItems = [
   { label: '홈', path: '/' },
