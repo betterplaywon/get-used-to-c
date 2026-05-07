@@ -21,22 +21,24 @@ C/C++을 학습하기 위한 인터랙티브 코드 에디터 + 메모리 시각
 
 ## 폴더 구조
 
+[Feature-Sliced Design](https://feature-sliced.design/) (5 layer: `app / pages / widgets / features / shared`).
+
 ```
 src/
-├── components/      # 공용 UI 컴포넌트 (Layout 등)
-├── features/
-│   ├── editor/      # Monaco 에디터 래퍼
-│   ├── runner/      # 코드 실행 클라이언트
-│   ├── visualizer/  # 메모리 시각화
-│   └── tutorial/    # 튜토리얼 콘텐츠/뷰어
-├── pages/           # 라우트별 페이지 컴포넌트
-├── store/           # Zustand 스토어
-├── lib/             # 유틸, 외부 API 클라이언트
-├── theme/           # MUI 테마 설정
-├── router.tsx       # 라우트 정의
-├── App.tsx          # 앱 루트 (Provider 조합)
-└── main.tsx         # 엔트리
+├── main.tsx                    # 엔트리
+├── app/                        # App, router, 글로벌 스타일
+├── pages/                      # 라우트별 페이지 슬라이스
+├── widgets/                    # 페이지 간 공유되는 큰 UI (Layout, TutorialList)
+├── features/                   # 사용자 동작 단위 (run-playground-code, run-tutorial-step)
+└── shared/
+    ├── api/                    # 외부 API 어댑터 (Judge0)
+    ├── ui/                     # 도메인 무관 UI (CodeEditor, ExecutionOutput, StepBody, StepNav)
+    ├── lib/                    # 순수 유틸
+    ├── config/                 # 테마, 샘플, 튜토리얼 콘텐츠
+    └── types/                  # 공용 타입
 ```
+
+자세한 규칙은 [docs/CODE_STYLE.md](docs/CODE_STYLE.md) 참고.
 
 ## 시작하기
 
@@ -72,6 +74,9 @@ npm run dev
 - [x] 프로젝트 셋업 (Vite + React + MUI + Router)
 - [x] Monaco 에디터 통합
 - [x] 코드 실행 연결 (Judge0 CE)
-- [ ] 메모리 시각화 (스택 → 힙 순)
-- [ ] 튜토리얼 콘텐츠 (변수, 포인터, 배열, malloc/free, 구조체)
+- [x] stdin 입력 + Monaco 에러 마커
+- [x] 튜토리얼 콘텐츠 v1 (인트로 → 변수 → 연산자 → 제어흐름 → 함수 → 포인터 → 배열 → 마무리)
+- [ ] 메모리 시각화 v1 (스택 + 변수 주소)
+- [ ] 메모리 시각화 v2 (힙 + 포인터 화살표)
+- [ ] 튜토리얼 콘텐츠 v2 (malloc/free, 구조체)
 - [ ] 사용자 진도 저장
