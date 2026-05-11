@@ -6,9 +6,18 @@ import { CONTROL_FLOW_TUTORIAL } from './control-flow';
 import { FUNCTIONS_TUTORIAL } from './functions';
 import { POINTERS_TUTORIAL } from './pointers';
 import { ARRAYS_TUTORIAL } from './arrays';
+import { DYNAMIC_MEMORY_TUTORIAL } from './dynamic-memory';
+import { STRUCTS_TUTORIAL } from './structs';
 import { OUTRO_TUTORIAL } from './outro';
 
-export type { Tutorial, TutorialStep } from './types';
+export type {
+  Tutorial,
+  TutorialStep,
+  MemoryTrace,
+  MemorySnapshot,
+  MemoryFrame,
+  MemoryVar,
+} from './types';
 
 export const TUTORIALS: readonly Tutorial[] = [
   INTRO_TUTORIAL,
@@ -18,6 +27,8 @@ export const TUTORIALS: readonly Tutorial[] = [
   FUNCTIONS_TUTORIAL,
   POINTERS_TUTORIAL,
   ARRAYS_TUTORIAL,
+  DYNAMIC_MEMORY_TUTORIAL,
+  STRUCTS_TUTORIAL,
   OUTRO_TUTORIAL,
 ];
 

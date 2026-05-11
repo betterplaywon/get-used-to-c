@@ -24,6 +24,46 @@ int main(void) {
 `,
       language: 'c',
       expectedStdout: 'arr[0] = 10\narr[1] = 20\narr[2] = 30\narr[3] = 40\narr[4] = 50\n',
+      memoryTrace: {
+        scenario: '5칸짜리 int 배열이 메모리에 연속으로 자리잡는 모습',
+        snapshots: [
+          {
+            line: 4,
+            caption:
+              '`int arr[5] = {10, 20, 30, 40, 50};` — 정수 칸 5개가 4바이트 간격으로 줄지어 잡힙니다.',
+            frames: [
+              {
+                name: 'main',
+                vars: [
+                  { name: 'arr[0]', type: 'int', value: '10', address: '0x7ffd0040' },
+                  { name: 'arr[1]', type: 'int', value: '20', address: '0x7ffd0044' },
+                  { name: 'arr[2]', type: 'int', value: '30', address: '0x7ffd0048' },
+                  { name: 'arr[3]', type: 'int', value: '40', address: '0x7ffd004c' },
+                  { name: 'arr[4]', type: 'int', value: '50', address: '0x7ffd0050' },
+                ],
+              },
+            ],
+          },
+          {
+            line: 5,
+            caption:
+              '반복문이 i를 0→4로 돌면서 각 칸의 값을 읽어 출력합니다. 칸 자체는 변하지 않습니다.',
+            frames: [
+              {
+                name: 'main',
+                vars: [
+                  { name: 'arr[0]', type: 'int', value: '10', address: '0x7ffd0040' },
+                  { name: 'arr[1]', type: 'int', value: '20', address: '0x7ffd0044' },
+                  { name: 'arr[2]', type: 'int', value: '30', address: '0x7ffd0048' },
+                  { name: 'arr[3]', type: 'int', value: '40', address: '0x7ffd004c' },
+                  { name: 'arr[4]', type: 'int', value: '50', address: '0x7ffd0050' },
+                  { name: 'i', type: 'int', value: '0..4', address: '0x7ffd0054' },
+                ],
+              },
+            ],
+          },
+        ],
+      },
     },
     {
       title: '배열은 메모리에 정말 "이어 붙어" 있다',
@@ -90,6 +130,81 @@ int main(void) {
 `,
       language: 'c',
       expectedStdout: '합계: 15\n',
+      memoryTrace: {
+        scenario: '함수에 배열을 넘기면 사실은 첫 칸의 주소가 넘어간다',
+        snapshots: [
+          {
+            line: 12,
+            caption: '`int data[5] = {1,2,3,4,5};` — main에 5칸 배열이 자리잡습니다.',
+            frames: [
+              {
+                name: 'main',
+                vars: [
+                  { name: 'data[0]', type: 'int', value: '1', address: '0x7ffd0040' },
+                  { name: 'data[1]', type: 'int', value: '2', address: '0x7ffd0044' },
+                  { name: 'data[2]', type: 'int', value: '3', address: '0x7ffd0048' },
+                  { name: 'data[3]', type: 'int', value: '4', address: '0x7ffd004c' },
+                  { name: 'data[4]', type: 'int', value: '5', address: '0x7ffd0050' },
+                ],
+              },
+            ],
+          },
+          {
+            line: 13,
+            caption:
+              '`sum(data, 5)` — sum 프레임의 arr는 배열 사본이 아니라 **첫 칸의 주소**입니다. n에는 길이 5가 따로 복사돼 들어갑니다.',
+            frames: [
+              {
+                name: 'sum',
+                vars: [
+                  {
+                    name: 'arr',
+                    type: 'int *',
+                    value: '0x7ffd0040',
+                    address: '0x7ffd0020',
+                    note: '→ main의 data[0]',
+                  },
+                  { name: 'n', type: 'int', value: '5', address: '0x7ffd0028' },
+                  { name: 'total', type: 'int', value: '0', address: '0x7ffd002c' },
+                ],
+              },
+              {
+                name: 'main',
+                vars: [
+                  { name: 'data[0]', type: 'int', value: '1', address: '0x7ffd0040' },
+                  { name: 'data[1]', type: 'int', value: '2', address: '0x7ffd0044' },
+                  { name: 'data[2]', type: 'int', value: '3', address: '0x7ffd0048' },
+                  { name: 'data[3]', type: 'int', value: '4', address: '0x7ffd004c' },
+                  { name: 'data[4]', type: 'int', value: '5', address: '0x7ffd0050' },
+                ],
+              },
+            ],
+          },
+          {
+            line: 6,
+            caption:
+              '반복문 종료 직전 — total은 1+2+3+4+5=15. main의 data는 그대로(읽기만 했음).',
+            frames: [
+              {
+                name: 'sum',
+                vars: [
+                  { name: 'arr', type: 'int *', value: '0x7ffd0040', address: '0x7ffd0020' },
+                  { name: 'n', type: 'int', value: '5', address: '0x7ffd0028' },
+                  { name: 'total', type: 'int', value: '15', address: '0x7ffd002c' },
+                  { name: 'i', type: 'int', value: '5', address: '0x7ffd0030' },
+                ],
+              },
+              {
+                name: 'main',
+                vars: [
+                  { name: 'data[0]', type: 'int', value: '1', address: '0x7ffd0040' },
+                  { name: 'data[4]', type: 'int', value: '5', address: '0x7ffd0050' },
+                ],
+              },
+            ],
+          },
+        ],
+      },
     },
     {
       title: '문자열 — 끝을 0으로 표시한 char 배열',

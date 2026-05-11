@@ -6,6 +6,7 @@ import { findTutorial, findTutorialIndex, type Tutorial } from '@/shared/config/
 import { StepBody } from '@/shared/ui/StepBody';
 import { StepNav } from '@/shared/ui/StepNav';
 import { StepRunner } from '@/features/run-tutorial-step';
+import { MemoryViewer } from '@/features/visualize-memory';
 import { getStepNavInfo } from '../lib/getStepNavInfo';
 
 export function TutorialDetailPage() {
@@ -64,6 +65,9 @@ function TutorialContent({ tutorial }: TutorialContentProps) {
   };
 
   const hasCode = step.code != null;
+  const hasMemoryTrace =
+    step.memoryTrace != null && step.memoryTrace.snapshots.length > 0;
+  const hasRightColumn = hasCode || hasMemoryTrace;
 
   return (
     <Stack sx={{ gap: 3 }}>
@@ -88,7 +92,7 @@ function TutorialContent({ tutorial }: TutorialContentProps) {
       <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: hasCode ? { xs: '1fr', md: '1fr 1fr' } : '1fr',
+          gridTemplateColumns: hasRightColumn ? { xs: '1fr', md: '1fr 1fr' } : '1fr',
           gap: 3,
           alignItems: 'stretch',
         }}
@@ -98,14 +102,24 @@ function TutorialContent({ tutorial }: TutorialContentProps) {
           <StepBody paragraphs={step.body} />
         </Stack>
 
-        {hasCode && step.code && (
-          <StepRunner
-            key={`${tutorial.slug}-${stepIndex}`}
-            initialCode={step.code}
-            language={step.language ?? 'c'}
-            expectedStdout={step.expectedStdout}
-            hint={step.hint}
-          />
+        {hasRightColumn && (
+          <Stack sx={{ gap: 2 }}>
+            {hasCode && step.code && (
+              <StepRunner
+                key={`${tutorial.slug}-${stepIndex}`}
+                initialCode={step.code}
+                language={step.language ?? 'c'}
+                expectedStdout={step.expectedStdout}
+                hint={step.hint}
+              />
+            )}
+            {hasMemoryTrace && step.memoryTrace && (
+              <MemoryViewer
+                key={`${tutorial.slug}-${stepIndex}-mem`}
+                trace={step.memoryTrace}
+              />
+            )}
+          </Stack>
         )}
       </Box>
 
