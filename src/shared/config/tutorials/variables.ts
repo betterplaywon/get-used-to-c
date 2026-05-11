@@ -62,6 +62,47 @@ int main(void) {
 `,
       language: 'c',
       expectedStdout: '처음 y = 10\n바꾼 y = 20\n',
+      memoryTrace: {
+        scenario: 'y의 선언과 대입',
+        snapshots: [
+          {
+            line: 4,
+            caption: '`int y = 10;` — main 프레임에 4바이트 칸을 잡고 10을 적습니다.',
+            frames: [
+              {
+                name: 'main',
+                vars: [
+                  { name: 'y', type: 'int', value: '10', address: '0x7ffd0040' },
+                ],
+              },
+            ],
+          },
+          {
+            line: 5,
+            caption: '`printf`는 칸의 값을 읽어 출력합니다. 값과 주소는 그대로입니다.',
+            frames: [
+              {
+                name: 'main',
+                vars: [
+                  { name: 'y', type: 'int', value: '10', address: '0x7ffd0040' },
+                ],
+              },
+            ],
+          },
+          {
+            line: 7,
+            caption: '`y = 20;` — 같은 칸의 값을 20으로 덮어씁니다. 주소는 그대로.',
+            frames: [
+              {
+                name: 'main',
+                vars: [
+                  { name: 'y', type: 'int', value: '20', address: '0x7ffd0040' },
+                ],
+              },
+            ],
+          },
+        ],
+      },
     },
     {
       title: '직접 고쳐보기',

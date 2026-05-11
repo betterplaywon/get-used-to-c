@@ -8,7 +8,14 @@ import { POINTERS_TUTORIAL } from './pointers';
 import { ARRAYS_TUTORIAL } from './arrays';
 import { OUTRO_TUTORIAL } from './outro';
 
-export type { Tutorial, TutorialStep } from './types';
+export type {
+  Tutorial,
+  TutorialStep,
+  MemoryTrace,
+  MemorySnapshot,
+  MemoryFrame,
+  MemoryVar,
+} from './types';
 
 export const TUTORIALS: readonly Tutorial[] = [
   INTRO_TUTORIAL,

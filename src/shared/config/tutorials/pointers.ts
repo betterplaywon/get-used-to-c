@@ -67,6 +67,82 @@ int main(void) {
 `,
       language: 'c',
       expectedStdout: '*p = 42 (변경 전)\nx  = 100 (변경 후)\n',
+      memoryTrace: {
+        scenario: 'p가 x를 가리키고 *p로 값을 바꾸기',
+        snapshots: [
+          {
+            line: 4,
+            caption: '`int x = 42;` — x 칸이 생기고 42가 들어갑니다.',
+            frames: [
+              {
+                name: 'main',
+                vars: [
+                  { name: 'x', type: 'int', value: '42', address: '0x7ffd0040' },
+                ],
+              },
+            ],
+          },
+          {
+            line: 5,
+            caption:
+              '`int *p = &x;` — p 칸이 생기고, 그 안에 x의 주소(0x7ffd0040)가 들어갑니다.',
+            frames: [
+              {
+                name: 'main',
+                vars: [
+                  { name: 'x', type: 'int', value: '42', address: '0x7ffd0040' },
+                  {
+                    name: 'p',
+                    type: 'int *',
+                    value: '0x7ffd0040',
+                    address: '0x7ffd0048',
+                    note: '→ x를 가리킴',
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            line: 7,
+            caption: '`printf("*p = %d", *p)` — p가 가리키는 칸의 값(42)을 읽습니다.',
+            frames: [
+              {
+                name: 'main',
+                vars: [
+                  { name: 'x', type: 'int', value: '42', address: '0x7ffd0040' },
+                  {
+                    name: 'p',
+                    type: 'int *',
+                    value: '0x7ffd0040',
+                    address: '0x7ffd0048',
+                    note: '→ x',
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            line: 8,
+            caption:
+              '`*p = 100;` — p가 가리키는 칸(=x)의 값을 100으로 바꿉니다. p 자체는 그대로.',
+            frames: [
+              {
+                name: 'main',
+                vars: [
+                  { name: 'x', type: 'int', value: '100', address: '0x7ffd0040' },
+                  {
+                    name: 'p',
+                    type: 'int *',
+                    value: '0x7ffd0040',
+                    address: '0x7ffd0048',
+                    note: '→ x',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
     },
     {
       title: '함수에 포인터를 넘기면 원본이 바뀐다',
@@ -92,6 +168,133 @@ int main(void) {
 `,
       language: 'c',
       expectedStdout: 'x = 9, y = 1\n',
+      memoryTrace: {
+        scenario: 'swap 호출 시 스택 프레임 변화',
+        snapshots: [
+          {
+            line: 11,
+            caption: 'main 진입 — x=1, y=9가 main 프레임에 자리 잡습니다.',
+            frames: [
+              {
+                name: 'main',
+                vars: [
+                  { name: 'x', type: 'int', value: '1', address: '0x7ffd0040' },
+                  { name: 'y', type: 'int', value: '9', address: '0x7ffd0044' },
+                ],
+              },
+            ],
+          },
+          {
+            line: 12,
+            caption:
+              '`swap(&x, &y)` 호출 — swap 프레임이 main 위에 쌓이고, a/b는 각각 x/y의 주소를 받습니다.',
+            frames: [
+              {
+                name: 'swap',
+                vars: [
+                  {
+                    name: 'a',
+                    type: 'int *',
+                    value: '0x7ffd0040',
+                    address: '0x7ffd0020',
+                    note: '→ main의 x',
+                  },
+                  {
+                    name: 'b',
+                    type: 'int *',
+                    value: '0x7ffd0044',
+                    address: '0x7ffd0028',
+                    note: '→ main의 y',
+                  },
+                ],
+              },
+              {
+                name: 'main',
+                vars: [
+                  { name: 'x', type: 'int', value: '1', address: '0x7ffd0040' },
+                  { name: 'y', type: 'int', value: '9', address: '0x7ffd0044' },
+                ],
+              },
+            ],
+          },
+          {
+            line: 4,
+            caption: '`int tmp = *a;` — a가 가리키는 값(1)을 tmp에 복사.',
+            frames: [
+              {
+                name: 'swap',
+                vars: [
+                  { name: 'a', type: 'int *', value: '0x7ffd0040', address: '0x7ffd0020' },
+                  { name: 'b', type: 'int *', value: '0x7ffd0044', address: '0x7ffd0028' },
+                  { name: 'tmp', type: 'int', value: '1', address: '0x7ffd0030' },
+                ],
+              },
+              {
+                name: 'main',
+                vars: [
+                  { name: 'x', type: 'int', value: '1', address: '0x7ffd0040' },
+                  { name: 'y', type: 'int', value: '9', address: '0x7ffd0044' },
+                ],
+              },
+            ],
+          },
+          {
+            line: 5,
+            caption: '`*a = *b;` — main의 x가 9로 바뀝니다 (포인터를 통해 원본 변경).',
+            frames: [
+              {
+                name: 'swap',
+                vars: [
+                  { name: 'a', type: 'int *', value: '0x7ffd0040', address: '0x7ffd0020' },
+                  { name: 'b', type: 'int *', value: '0x7ffd0044', address: '0x7ffd0028' },
+                  { name: 'tmp', type: 'int', value: '1', address: '0x7ffd0030' },
+                ],
+              },
+              {
+                name: 'main',
+                vars: [
+                  { name: 'x', type: 'int', value: '9', address: '0x7ffd0040' },
+                  { name: 'y', type: 'int', value: '9', address: '0x7ffd0044' },
+                ],
+              },
+            ],
+          },
+          {
+            line: 6,
+            caption: '`*b = tmp;` — main의 y가 1로 바뀝니다.',
+            frames: [
+              {
+                name: 'swap',
+                vars: [
+                  { name: 'a', type: 'int *', value: '0x7ffd0040', address: '0x7ffd0020' },
+                  { name: 'b', type: 'int *', value: '0x7ffd0044', address: '0x7ffd0028' },
+                  { name: 'tmp', type: 'int', value: '1', address: '0x7ffd0030' },
+                ],
+              },
+              {
+                name: 'main',
+                vars: [
+                  { name: 'x', type: 'int', value: '9', address: '0x7ffd0040' },
+                  { name: 'y', type: 'int', value: '1', address: '0x7ffd0044' },
+                ],
+              },
+            ],
+          },
+          {
+            line: 13,
+            caption: 'swap 반환 — swap 프레임이 사라지고 main만 남습니다. x와 y가 교환됨.',
+            frames: [
+              {
+                name: 'main',
+                vars: [
+                  { name: 'x', type: 'int', value: '9', address: '0x7ffd0040' },
+                  { name: 'y', type: 'int', value: '1', address: '0x7ffd0044' },
+                ],
+              },
+            ],
+          },
+        ],
+      },
     },
     {
       title: 'NULL과 잘못된 포인터',
