@@ -24,6 +24,37 @@ int main(void) {
 }
 `,
       language: 'c',
+      memoryTrace: {
+        scenario: 'x와 y가 메모리에 나란히 자리잡는 모습',
+        snapshots: [
+          {
+            line: 4,
+            caption: '`int x = 42;` — main 프레임에 4바이트 칸이 잡히고 42가 들어갑니다.',
+            frames: [
+              {
+                name: 'main',
+                vars: [
+                  { name: 'x', type: 'int', value: '42', address: '0x7ffd0040' },
+                ],
+              },
+            ],
+          },
+          {
+            line: 5,
+            caption:
+              '`int y = 7;` — y 칸이 x 바로 옆(4바이트 차이)에 잡힙니다. `&x`와 `&y`는 이 두 주소를 그대로 보여줍니다.',
+            frames: [
+              {
+                name: 'main',
+                vars: [
+                  { name: 'x', type: 'int', value: '42', address: '0x7ffd0040' },
+                  { name: 'y', type: 'int', value: '7', address: '0x7ffd0044' },
+                ],
+              },
+            ],
+          },
+        ],
+      },
     },
     {
       title: '포인터 변수 — 주소를 담는 칸',
@@ -45,6 +76,43 @@ int main(void) {
 }
 `,
       language: 'c',
+      memoryTrace: {
+        scenario: '포인터 칸이 다른 칸의 주소를 담는 모습',
+        snapshots: [
+          {
+            line: 4,
+            caption: '`int x = 42;` — 정수 칸 x.',
+            frames: [
+              {
+                name: 'main',
+                vars: [
+                  { name: 'x', type: 'int', value: '42', address: '0x7ffd0040' },
+                ],
+              },
+            ],
+          },
+          {
+            line: 5,
+            caption:
+              '`int *p = &x;` — p는 "주소를 담는 칸"입니다. 안에 x의 주소(0x7ffd0040)가 적힙니다.',
+            frames: [
+              {
+                name: 'main',
+                vars: [
+                  { name: 'x', type: 'int', value: '42', address: '0x7ffd0040' },
+                  {
+                    name: 'p',
+                    type: 'int *',
+                    value: '0x7ffd0040',
+                    address: '0x7ffd0048',
+                    note: '→ x',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
     },
     {
       title: '역참조 `*p` — 주소를 따라 값에 닿기',
@@ -318,6 +386,48 @@ int main(void) {
 `,
       language: 'c',
       expectedStdout: 'p는 아직 아무것도 가리키지 않습니다\n',
+      memoryTrace: {
+        scenario: 'NULL로 초기화된 포인터',
+        snapshots: [
+          {
+            line: 4,
+            caption:
+              '`int *p = NULL;` — p 칸 자체는 존재하지만, 안에는 "아무 데도 안 가리킴" 표시(0)가 들어 있습니다.',
+            frames: [
+              {
+                name: 'main',
+                vars: [
+                  {
+                    name: 'p',
+                    type: 'int *',
+                    value: 'NULL (0x0)',
+                    address: '0x7ffd0048',
+                    note: '역참조하면 충돌',
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            line: 6,
+            caption:
+              '`if (p != NULL)` — 0이라서 거짓. 역참조를 건너뛰는 안전한 분기로 들어갑니다.',
+            frames: [
+              {
+                name: 'main',
+                vars: [
+                  {
+                    name: 'p',
+                    type: 'int *',
+                    value: 'NULL (0x0)',
+                    address: '0x7ffd0048',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
     },
   ],
 };

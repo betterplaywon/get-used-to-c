@@ -49,6 +49,79 @@ int main(void) {
 `,
       language: 'c',
       expectedStdout: 'x는 여전히 10입니다\n',
+      memoryTrace: {
+        scenario: '값 복사 — 함수 안의 n과 main의 x는 별개의 칸',
+        snapshots: [
+          {
+            line: 8,
+            caption: 'main 진입 — x=10이 main 프레임에 자리잡습니다.',
+            frames: [
+              {
+                name: 'main',
+                vars: [
+                  { name: 'x', type: 'int', value: '10', address: '0x7ffd0040' },
+                ],
+              },
+            ],
+          },
+          {
+            line: 9,
+            caption:
+              '`try_to_change(x)` 호출 — 새 프레임이 쌓이고, 매개변수 n에는 x의 **값(10)** 이 복사돼 들어갑니다. 주소는 다릅니다.',
+            frames: [
+              {
+                name: 'try_to_change',
+                vars: [
+                  {
+                    name: 'n',
+                    type: 'int',
+                    value: '10',
+                    address: '0x7ffd0020',
+                    note: 'x의 사본',
+                  },
+                ],
+              },
+              {
+                name: 'main',
+                vars: [
+                  { name: 'x', type: 'int', value: '10', address: '0x7ffd0040' },
+                ],
+              },
+            ],
+          },
+          {
+            line: 4,
+            caption: '`n = 999;` — 함수의 사본만 999로 바뀝니다. main의 x는 그대로.',
+            frames: [
+              {
+                name: 'try_to_change',
+                vars: [
+                  { name: 'n', type: 'int', value: '999', address: '0x7ffd0020' },
+                ],
+              },
+              {
+                name: 'main',
+                vars: [
+                  { name: 'x', type: 'int', value: '10', address: '0x7ffd0040' },
+                ],
+              },
+            ],
+          },
+          {
+            line: 10,
+            caption:
+              '함수 반환 — try_to_change 프레임이 사라집니다. main의 x는 여전히 10.',
+            frames: [
+              {
+                name: 'main',
+                vars: [
+                  { name: 'x', type: 'int', value: '10', address: '0x7ffd0040' },
+                ],
+              },
+            ],
+          },
+        ],
+      },
     },
     {
       title: '함수 선언과 정의 분리 — 프로토타입',
